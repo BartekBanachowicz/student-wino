@@ -1,4 +1,4 @@
-SOURCES=$(wildcard *.cpp)
+SOURCES=$(wildcard threads/*/*.cpp)
 HEADERS=$(SOURCES:.cpp=.hpp)
 FLAGS=-DDEBUG -g -Wall
 
