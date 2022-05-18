@@ -53,7 +53,7 @@ void askForSafePlace(){
 	for (int rank = 0; rank < WINEMAKERS; rank++){
 		if (rank != tid){
 			//TODO: niektórzy nam nie odpowiedzą, więc po co wysyłać
-        	MPI_Send(msg, 2, MPI_INT, rank, TAG_DEMAND, MPI_COMM_WORLD);
+        	MPI_Send(msg, 2, MPI_INT, rank, TAG_SAFE_PLACE_DEMAND, MPI_COMM_WORLD);
 		}
     }
 }
@@ -88,7 +88,7 @@ int main(int argc, char** argv){
 				wineToGive = msg[1];
 				break;
 			
-			case TAG_DEMAND:
+			case TAG_SAFE_PLACE_DEMAND:
 				if (!demand || 
 					msg[0] < oldClock || 
 					((msg[0] == oldClock) && msg[1] > wineAmount) || 

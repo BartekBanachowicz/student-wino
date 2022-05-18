@@ -10,10 +10,9 @@
 #define MAX_WINE 10
 #define MAX_SLEEP 5
 #define SAFE_PLACES 2
-//QUESTION: jak dzielimy studentów i winiarzy? (na razie zrobiłam najpierw 5 procesów winiarzy, a pozostałe 3 - studentów)
 
-#define TAG_DEMAND 3 //I need safe place
-#define TAG_FREE 4 //I left safe place
+#define TAG_SAFE_PLACE_DEMAND 3 //I need safe place
+
 
 int wineAmount; // amount of wine made by me - my offer
 int safePlaces; // number of places in critical section
