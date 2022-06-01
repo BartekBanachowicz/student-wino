@@ -1,9 +1,10 @@
 #pragma once
 #include "../main_thread.hpp"
 
-int lClock;
 int* wineDemands;
+int* goCounters;
 int wineDemand;
+int* winemakersClocks;
 int* offers;
 bool amILider;
 
@@ -12,4 +13,14 @@ bool amILider;
 #define TAG_GO 8
 #define TAG_HOMEBASE 9
 
-//TODO: struct msg
+#define MAX_WINE 6
+#define MAX_SLEEP 3
+
+typedef struct msg_s{
+    int wineDemands [STUDENTS] ;
+    int goCounters [STUDENTS];
+    int wineOffers [WINEMAKERS];
+    int winemakersClocks [WINEMAKERS];
+};
+
+

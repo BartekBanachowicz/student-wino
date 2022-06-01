@@ -7,7 +7,6 @@ void produceWine(){
     //send message to students
     log("Wyprodukowałem " + std::to_string(wineAmount) + " wina");
     
-    //IDEA: można to wysłać strukturą, ale trzeba stworzyć mpi-owy typ https://stackoverflow.com/questions/9864510/struct-serialization-in-c-and-transfer-over-mpi
     int msg [2] = {++lClock, wineAmount};
 	log("Wysyłam wiadomość z ofertą");
     for (int rank = WINEMAKERS ; rank < WINEMAKERS + STUDENTS; rank++){
