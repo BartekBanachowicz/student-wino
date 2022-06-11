@@ -6,6 +6,7 @@ int* goCounters;
 int wineDemand;
 int* winemakersClocks;
 int* offers;
+bool* freeStudents;
 bool amILider;
 
 #define TAG_WINE_DEMAND 6
