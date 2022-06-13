@@ -1,5 +1,5 @@
 #pragma once
-#include "../main_thread.hpp"
+#include "../consts.hpp"
 
 #include <time.h>
 #include <unistd.h>

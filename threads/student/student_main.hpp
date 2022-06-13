@@ -1,5 +1,8 @@
 #pragma once
-#include "../main_thread.hpp"
+#include "../consts.hpp"
+#include <unistd.h>
+#include <list>
+#include <algorithm>
 
 int* wineDemands;
 int* goCounters;

@@ -1,21 +1,22 @@
 #include "winemaker_main.hpp"
 
+
 void produceWine(){
     srand(time(NULL) + tid);
     wineAmount = rand() % MAX_WINE +1;
 
     //send message to students
-    log("Wyprodukowałem " + std::to_string(wineAmount) + " wina");
+    //log("Wyprodukowałem " + std::to_string(wineAmount) + " wina");
     
     int msg [2] = {++lClock, wineAmount};
-	log("Wysyłam wiadomość z ofertą");
+	//log("Wysyłam wiadomość z ofertą");
     for (int rank = WINEMAKERS ; rank < WINEMAKERS + STUDENTS; rank++){
         MPI_Send( msg, 2, MPI_INT, rank, TAG_OFFER, MPI_COMM_WORLD);
     }
 }
 
 void meetStudent(int studentRank, int wineToGive){
-	log("Oddaję "+ std::to_string(wineToGive)+"wina");
+	//log("Oddaję "+ std::to_string(wineToGive)+"wina");
 
 	wineAmount -= wineToGive;
 	int msg[2] = {++lClock, wineAmount}; //send how much wine left
@@ -33,7 +34,7 @@ void meetStudent(int studentRank, int wineToGive){
 	if (wineAmount <= 0){
 		srand(time(NULL));
 		int sleepTime = rand() % MAX_SLEEP;
-		log("Śpię " + std::to_string(sleepTime));
+		//log("Śpię " + std::to_string(sleepTime));
 		sleep(sleepTime);
 
 		produceWine();
@@ -42,7 +43,7 @@ void meetStudent(int studentRank, int wineToGive){
 }
 
 void askForSafePlace(){
-	log("Żądam miejsca");
+	//log("Żądam miejsca");
 
 	demand = true;
 	acksLeft = WINEMAKERS - 1 - (SAFE_PLACES - safePlaces); //excluding me and winemakers before me
@@ -57,12 +58,9 @@ void askForSafePlace(){
     }
 }
 
-int main(int argc, char** argv){
-
-    MPI_Init(&argc, &argv); 
-	MPI_Comm_rank( MPI_COMM_WORLD, &tid);
-    
-   	log("Winiarz");
+int winemakerMain(int argc, char** argv)
+{
+   	//log("Winiarz");
 
 	produceWine();
 	
@@ -75,7 +73,7 @@ int main(int argc, char** argv){
 
 	while (1){
 		MPI_Recv(msg, 2, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-		log("Mam wiadomość");
+		//log("Mam wiadomość");
 
 		oldClock = lClock;
 		lClock = std::max(msg[0], lClock) + 1;
@@ -123,8 +121,5 @@ int main(int argc, char** argv){
 				}
 		}
 	}
-		
-	MPI_Finalize(); // Musi być w każdym programie na końcu
-
     return 0;
 }

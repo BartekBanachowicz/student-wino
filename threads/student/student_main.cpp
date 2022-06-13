@@ -1,7 +1,4 @@
 #include "student_main.hpp"
-#include <unistd.h>
-#include <list>
-#include <algorithm>
 
 MPI_Datatype create_MPI_struct()
 {
@@ -26,7 +23,7 @@ MPI_Datatype create_MPI_struct()
 
 void sendToStudents(int* msg, int tag)
 {
-    log("Wysyłam wiadomość");
+    ////log("Wysyłam wiadomość");
     for (int rank = OFFSET ; rank < OFFSET + STUDENTS; rank++){
         MPI_Send(&msg, 2, MPI_INT, rank, tag, MPI_COMM_WORLD);
     }
@@ -39,7 +36,7 @@ void determineDemand()
     wineDemand = rand() % MAX_WINE +1;
 
     //send message to students
-    log("Żądam " + std::to_string(wineDemand) + " wina");
+    ////log("Żądam " + std::to_string(wineDemand) + " wina");
     
     int msg [2] = {lClock, wineDemand};
 	sendToStudents(msg, TAG_WINE_DEMAND);
@@ -163,13 +160,10 @@ void liderSection(int offersCounter, int demandsCounter, bool* freeStudents, int
     }
 }
 
-int main(int argc, char** argv){
-
-    MPI_Init(&argc, &argv); 
-	MPI_Comm_rank( MPI_COMM_WORLD, &tid);
+int studentMain(int argc, char** argv){
     MPI_Datatype mpi_lider_msg = create_MPI_struct();
     
-   	log("Student");
+   	////log("Student");
 
     //wait for messages
     MPI_Status status;
@@ -186,7 +180,7 @@ int main(int argc, char** argv){
 	while (1)
     {
         MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-		log("Mam wiadomość");
+		////log("Mam wiadomość");
 
         if (status.MPI_TAG == TAG_BATON)
         {
@@ -271,8 +265,5 @@ int main(int argc, char** argv){
             }
         }
 	}
-		
-	MPI_Finalize(); // Musi być w każdym programie na końcu
-
     return 0;
 }
