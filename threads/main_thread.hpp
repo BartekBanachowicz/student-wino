@@ -4,6 +4,7 @@
 #include <mpi.h>
 
 #define STUDENTS 3
+#define OFFSET WINEMAKERS
 #define WINEMAKERS 5
 
 #define TAG_OFFER 1 //I have wine

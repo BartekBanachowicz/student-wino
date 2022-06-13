@@ -22,6 +22,7 @@ typedef struct msg_s{
     int goCounters [STUDENTS];
     int wineOffers [WINEMAKERS];
     int winemakersClocks [WINEMAKERS];
+    bool freeStudents[STUDENTS];
 };
 
 
