@@ -4,21 +4,20 @@
 #include <list>
 #include <algorithm>
 
-int* wineDemands;
-int* goCounters;
-int wineDemand;
-int* winemakersClocks;
-int* offers;
-bool* freeStudents;
-bool amILider;
+extern int* wineDemands;
+extern int* goCounters;
+extern int wineDemand;
+extern int* winemakersClocks;
+extern int* offers;
+extern bool* freeStudents;
+extern bool amILider;
 
 #define TAG_WINE_DEMAND 6
 #define TAG_BATON 7
 #define TAG_GO 8
 #define TAG_HOMEBASE 9
 
-#define MAX_WINE 6
-#define MAX_SLEEP 3
+#define MAX_WINE_STUDENT 6
 
 typedef struct{
     int wineDemands [STUDENTS] ;
@@ -27,5 +26,15 @@ typedef struct{
     int winemakersClocks [WINEMAKERS];
     bool freeStudents[STUDENTS];
 }msg_s;
+
+MPI_Datatype create_MPI_struct();
+void sendToStudents(int* msg, int tag);
+void determineDemand();
+void allocTables(int elemSize);
+void freeTables();
+void goForIt(int winemaker);
+void liderSection(int offersCounter, int demandsCounter, bool* freeStudents, int* wineOffers, int* winemakersClocks, MPI_Datatype mpi_lider_msg);
+int studentMain();
+
 
 

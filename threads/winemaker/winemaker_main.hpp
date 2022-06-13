@@ -7,19 +7,19 @@
 #include <algorithm>
 
 //TODO: wczytywać jako parametr
-#define MAX_WINE 10
-#define MAX_SLEEP 5
+#define MAX_WINE_WINEMAKER 10
 #define SAFE_PLACES 2
 
 #define TAG_SAFE_PLACE_DEMAND 3 //I need safe place
 
 
-int wineAmount; // amount of wine made by me - my offer
-int safePlaces; // number of places in critical section
-int wmakersAfterMe; // after me in queue to critical section
-bool demand = false; //do I need critical section
-int acksLeft; // how many acks needed to enter critical section
+extern int wineAmount; // amount of wine made by me - my offer
+extern int safePlaces; // number of places in critical section
+extern int wmakersAfterMe; // after me in queue to critical section
+extern bool demand; //do I need critical section
+extern int acksLeft; // how many acks needed to enter critical section
 
+int winemakerMain();
 void produceWine();
 void meetStudent(int studentRank, int wineToGive);
 void askForSafePlace();

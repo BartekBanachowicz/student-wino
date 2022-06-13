@@ -1,5 +1,13 @@
 #include "student_main.hpp"
 
+int* wineDemands;
+int* goCounters;
+int* winemakersClocks;
+int* offers;
+int wineDemand;
+bool* freeStudents;
+bool amILider;
+
 MPI_Datatype create_MPI_struct()
 {
      /* create a type for struct msg_s */
@@ -32,8 +40,8 @@ void sendToStudents(int* msg, int tag)
 
 void determineDemand()
 {
-    srand(time(NULL) + tid);
-    wineDemand = rand() % MAX_WINE +1;
+    srand(time(NULL) + rank);
+    wineDemand = rand() % MAX_WINE_STUDENT +1;
 
     //send message to students
     ////log("Żądam " + std::to_string(wineDemand) + " wina");
@@ -60,7 +68,8 @@ void freeTables()
     free(freeStudents);
 }
 
-void goForIt(int winemaker){
+void goForIt(int winemaker)
+{
     int msg[2];
     MPI_Status status;
 
@@ -160,7 +169,8 @@ void liderSection(int offersCounter, int demandsCounter, bool* freeStudents, int
     }
 }
 
-int studentMain(int argc, char** argv){
+int studentMain()
+{
     MPI_Datatype mpi_lider_msg = create_MPI_struct();
     
    	////log("Student");

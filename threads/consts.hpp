@@ -14,18 +14,20 @@
 #define TAG_FREE 4 //I left safe place, student is free
 #define TAG_ACK 5 //Aggrement to enter safe place
 
-extern int tid;
+#define MAX_SLEEP 3
+
+extern int rank;
 extern int lClock; //lamport clock
 
 
 //in msg first value is lamport clock, next is message
 //void log(std::string msg){
-//    std::cout<<"[LOG] "<<tid<<" "<<lClock<<" "<<msg<<std::endl;
+//    std::cout<<"[LOG] "<<rank<<" "<<lClock<<" "<<msg<<std::endl;
 //}
 
 //
 //#ifdef DE
-//#define debug(FORMAT,...) printf("%c[%d;%dm [%d %d]: " FORMAT "%c[%d;%dm\n",  27, (1+(tid/7))%2, 31+(6+tid)%7, tid, lClock, ##__VA_ARGS__, 27,0,37);
+//#define debug(FORMAT,...) printf("%c[%d;%dm [%d %d]: " FORMAT "%c[%d;%dm\n",  27, (1+(rank/7))%2, 31+(6+rank)%7, rank, lClock, ##__VA_ARGS__, 27,0,37);
 //#else
 //#define debug(...) ;
 //#endif
@@ -40,5 +42,5 @@ extern int lClock; //lamport clock
 //#define P_SET(X) printf("%c[%d;%dm",27,1,31+(6+X)%7);
 //#define P_CLR printf("%c[%d;%dm",27,0,37);
 //
-///* printf ale z kolorkami i automatycznym wyświetlaniem tid. Patrz debug wyżej po szczegóły, jak działa ustawianie kolorków */
-//#define println(FORMAT, ...) printf("%c[%d;%dm [%d %d]: " FORMAT "%c[%d;%dm\n",  27, (1+(tid/7))%2, 31+(6+tid)%7, tid, lamport_clock, ##__VA_ARGS__, 27,0,37);
+///* printf ale z kolorkami i automatycznym wyświetlaniem rank. Patrz debug wyżej po szczegóły, jak działa ustawianie kolorków */
+//#define println(FORMAT, ...) printf("%c[%d;%dm [%d %d]: " FORMAT "%c[%d;%dm\n",  27, (1+(rank/7))%2, 31+(6+rank)%7, rank, lamport_clock, ##__VA_ARGS__, 27,0,37);

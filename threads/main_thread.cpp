@@ -1,21 +1,12 @@
-#include "main.hpp"
+#include "main_thread.hpp"
 
 /* sem_init sem_destroy sem_post sem_wait */
 //#include <semaphore.h>
 /* flagi dla open */
 //#include <fcntl.h>
 
-int tid;
+int rank;
 int lClock = 0;
-
-state_t stan=InRun;
-int size,rank, money, lamport_clock; /* nie trzeba zerować, bo zmienna globalna statyczna */
-MPI_Datatype MPI_PAKIET_T;
-pthread_t threadKom, threadMon;
-
-pthread_mutex_t stateMut = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t moneyMut = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t clockMut = PTHREAD_MUTEX_INITIALIZER;
 
 void check_thread_support(int provided)
 {
@@ -41,16 +32,16 @@ void check_thread_support(int provided)
     }
 }
 
-void inicjuj(int *argc, char ***argv)
+void inicjuj(int argc, char **argv)
 {
-    int provided;
-    MPI_Init_thread(argc, argv,MPI_THREAD_MULTIPLE, &provided);
-    check_thread_support(provided);
+    std::cout<<"Początek początków\n";
+    // int provided;
+    MPI_Init(&argc, &argv); 
+    // MPI_Init_thread(argc, argv,MPI_THREAD_MULTIPLE, &provided);
+    // check_thread_support(provided);
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-    ////log("jestem");
+    //log("jestem");
 }
 
 /* usunięcie zamkków, czeka, aż zakończy się drugi wątek, zwalnia przydzielony typ MPI_PAKIET_T
@@ -68,7 +59,9 @@ void finalizuj()
 
 int main(int argc, char **argv)
 {
-    inicjuj(&argc,&argv);
+    std::cout<<"Ja tu nic nie robię\n";
+
+    inicjuj(argc, argv);
 
     if (rank < WINEMAKERS)
     {

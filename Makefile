@@ -1,4 +1,4 @@
-SOURCES=$(wildcard threads/*/*.cpp)
+SOURCES=$(wildcard threads/*/*.cpp threads/*.cpp)
 HEADERS=$(SOURCES:.cpp=.hpp)
 FLAGS=-DDEBUG -g -Wall
 
@@ -13,4 +13,4 @@ clean:
 	rm main a.out
 
 run: main
-	mpirun -oversubscribe -np 8 ./main
+	mpirun -np 1 ./main

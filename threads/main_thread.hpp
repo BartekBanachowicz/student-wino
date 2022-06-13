@@ -1,6 +1,6 @@
 #pragma once
-#include "student_main.hpp"
-#include "winemaker_main.hpp"
+#include "student/student_main.hpp"
+#include "winemaker/winemaker_main.hpp"
 
 //do rozwiązywania problemów
 //-mca btl tcp

@@ -1,9 +1,12 @@
 #include "winemaker_main.hpp"
 
+int wineAmount, safePlaces, wmakersAfterMe, acksLeft;
+bool demand = false;
+
 
 void produceWine(){
-    srand(time(NULL) + tid);
-    wineAmount = rand() % MAX_WINE +1;
+    srand(time(NULL) + rank);
+    wineAmount = rand() % MAX_WINE_WINEMAKER +1;
 
     //send message to students
     //log("Wyprodukowałem " + std::to_string(wineAmount) + " wina");
@@ -50,15 +53,15 @@ void askForSafePlace(){
 
 	int msg[2] = {++lClock, wineAmount};
 	
-	for (int rank = 0; rank < WINEMAKERS; rank++){
-		if (rank != tid){
+	for (int i = 0; i < WINEMAKERS; i++){
+		if (i != rank){
 			//TODO: niektórzy nam nie odpowiedzą, więc po co wysyłać
-        	MPI_Send(msg, 2, MPI_INT, rank, TAG_SAFE_PLACE_DEMAND, MPI_COMM_WORLD);
+        	MPI_Send(msg, 2, MPI_INT, i, TAG_SAFE_PLACE_DEMAND, MPI_COMM_WORLD);
 		}
     }
 }
 
-int winemakerMain(int argc, char** argv)
+int winemakerMain()
 {
    	//log("Winiarz");
 
@@ -89,7 +92,7 @@ int winemakerMain(int argc, char** argv)
 				if (!demand || 
 					msg[0] < oldClock || 
 					((msg[0] == oldClock) && msg[1] > wineAmount) || 
-					((msg[0] == oldClock) && (msg[1] == wineAmount) && status.MPI_SOURCE > tid)){ 
+					((msg[0] == oldClock) && (msg[1] == wineAmount) && status.MPI_SOURCE > rank)){ 
 
 					msg[0] = ++lClock;
 					msg[1] = 89; 
