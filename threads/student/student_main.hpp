@@ -17,12 +17,12 @@ bool amILider;
 #define MAX_WINE 6
 #define MAX_SLEEP 3
 
-typedef struct msg_s{
+typedef struct{
     int wineDemands [STUDENTS] ;
     int goCounters [STUDENTS];
     int wineOffers [WINEMAKERS];
     int winemakersClocks [WINEMAKERS];
     bool freeStudents[STUDENTS];
-};
+}msg_s;
 
 

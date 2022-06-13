@@ -63,75 +63,6 @@ void freeTables()
     free(freeStudents);
 }
 
-void liderSection(int* offersCounter, int* demandsCounter, bool* freeStudents, int* wineOffers, int* winemakersClocks)
-{
-    if (offersCounter > 0 && demandsCounter > 0)
-    {
-        //Sortujemy wolnych studentów insertion sortem na podstawie goCounters i wineDemands
-        std::list<int> studentsQ; 
-        for (int i; i<STUDENTS; i++)
-        {
-            if (freeStudents[i] == 1)
-            {
-                auto pos = studentsQ.begin();
-                while (goCounters[*pos] < goCounters[i]) pos++;
-                while (goCounters[*pos] == goCounters[i] && wineDemands[*pos] < wineDemands[i]) pos++; //QUESTION: rosnąco czy malejąco?
-                studentsQ.insert(pos, i);                   
-            } 
-        }
-
-        //dopisz ofertę do kolejki winiarzy (wg. czasu, później oferty, później rangi)
-        std::list<int> winemakersQ;
-        for (int i; i<WINEMAKERS; i++)
-        {
-            if (wineOffers[i] != 0)
-            {
-                auto pos = winemakersQ.begin();
-                while(winemakersClocks[*pos] < winemakersClocks[i]) pos++;
-                while(winemakersClocks[*pos] == winemakersClocks[i] && wineOffers[*pos] > wineOffers[i]) pos++;
-                winemakersQ.insert(pos, i);
-            }
-        }
-        // w sumie można by nawet ich ładniej dopasować
-        int my_winemaker = winemakersQ.front();
-        winemakersQ.pop_front();
-
-        std::cout<<"my_winemaker"<<my_winemaker<<std::endl;
-
-        //wyślij studentom wiadomości do których winiarzy mają iść
-        auto student = studentsQ.begin();
-        auto winemaker = winemakersQ.begin();
-
-        while (student != studentsQ.end() && winemaker != winemakersQ.end())
-        {
-            int msg[2];
-            msg[1] = *winemaker;
-            std::cout<<"winemaker"<<msg[1];
-            MPI_Send(msg, 2, MPI_INT, studentsQ[i] + OFFSET, TAG_GO, MPI_COMM_WORLD);
-            student++;
-            winemaker++;
-        }
-
-        //przekaż pałeczkę następnemu studentowi w kolejce
-        if (!studentsQ.empty())
-        {
-            struct msg_long msg_long;
-            std::copy(wineDemands, wineDemands + STUDENTS, msg_long.wineDemands);
-            std::copy(goCounters, goCounters + STUDENTS , msg_long.goCounters);
-            std::copy(wineOffers, wineOffers + WINEMAKERS, msg_long.wineOffers);
-            std::copy(winemakersClocks, winemakersClocks + WINEMAKERS, msg_long.winemakersClocks);
-            std::copy(freeStudents, freeStudents + STUDENTS, msg_long.freeStudents);
-
-            MPI_Send(&msg_long, 2, mpi_lider_msg, studentsQ.front() + OFFSET, TAG_GO, MPI_COMM_WORLD);
-            amILider = false;
-        }
-        else
-        {
-            //TODO
-        }
-    }
-}
-
 void goForIt(int winemaker){
     int msg[2];
     MPI_Status status;
@@ -153,6 +84,82 @@ void goForIt(int winemaker){
         sleep(rand() % MAX_SLEEP);
         determineDemand();
         //TODO: śpij
+    }
+}
+
+void liderSection(int offersCounter, int demandsCounter, bool* freeStudents, int* wineOffers, int* winemakersClocks, MPI_Datatype mpi_lider_msg)
+{
+    if (offersCounter > 0 && demandsCounter > 0)
+    {
+        //Sortujemy wolnych studentów insertion sortem na podstawie goCounters i wineDemands
+        std::list<int> studentsQ;
+        for (int i; i<STUDENTS; i++)
+        {
+            if (freeStudents[i] == 1)
+            {
+                auto pos = studentsQ.begin();
+                while (goCounters[*pos] < goCounters[i]) pos++;
+                while (goCounters[*pos] == goCounters[i] && wineDemands[*pos] < wineDemands[i]) pos++; //QUESTION: rosnąco czy malejąco?
+                studentsQ.insert(pos, i);
+            }
+        }
+
+        //dopisz ofertę do kolejki winiarzy (wg. czasu, później oferty, później rangi)
+        std::list<int> winemakersQ;
+        int newLider = -1;
+
+        for (int i; i<WINEMAKERS; i++)
+        {
+            if (wineOffers[i] != 0)
+            {
+                auto pos = winemakersQ.begin();
+                while(winemakersClocks[*pos] < winemakersClocks[i]) pos++;
+                while(winemakersClocks[*pos] == winemakersClocks[i] && wineOffers[*pos] > wineOffers[i]) pos++;
+                winemakersQ.insert(pos, i);
+            }
+            else if (newLider == -1) newLider = i;
+        }
+        // w sumie można by nawet ich ładniej dopasować
+        int myWinemaker = winemakersQ.front();
+        winemakersQ.pop_front();
+
+        std::cout<<"my_winemaker"<<myWinemaker<<std::endl;
+
+        //wyślij studentom wiadomości do których winiarzy mają iść
+        auto student = studentsQ.begin();
+        auto winemaker = winemakersQ.begin();
+
+        while (student != studentsQ.end() && winemaker != winemakersQ.end())
+        {
+            int msg[2];
+            msg[1] = *winemaker;
+            std::cout<<"winemaker"<<msg[1];
+
+            MPI_Send(msg, 2, MPI_INT, *student + OFFSET, TAG_GO, MPI_COMM_WORLD);
+            freeStudents[*student] = 0;
+
+            studentsQ.pop_front();
+            winemakersQ.pop_front();
+        }
+
+        //przekaż pałeczkę następnemu studentowi w kolejce, jeżeli go nie ma, pierwszemu wolnemu
+        if (!studentsQ.empty())
+        {
+            newLider =  studentsQ.front();
+        }
+
+
+        msg_s msg_long;
+        std::copy(wineDemands, wineDemands + STUDENTS, msg_long.wineDemands);
+        std::copy(goCounters, goCounters + STUDENTS , msg_long.goCounters);
+        std::copy(wineOffers, wineOffers + WINEMAKERS, msg_long.wineOffers);
+        std::copy(winemakersClocks, winemakersClocks + WINEMAKERS, msg_long.winemakersClocks);
+        std::copy(freeStudents, freeStudents + STUDENTS, msg_long.freeStudents);
+
+        MPI_Send(&msg_long, 2, mpi_lider_msg, newLider + OFFSET, TAG_GO, MPI_COMM_WORLD);
+
+        amILider = false;
+        goForIt(myWinemaker);
     }
 }
 
@@ -207,7 +214,7 @@ int main(int argc, char** argv){
 
             std::copy(freeStudents, freeStudents+STUDENTS, msg_long.freeStudents);
 
-            liderSection(offersCounter, demandsCounter, freeStudents);
+            liderSection(offersCounter, demandsCounter, freeStudents, offers, winemakersClocks, mpi_lider_msg);
             
         }
         else
@@ -219,7 +226,8 @@ int main(int argc, char** argv){
                 case TAG_WINE_DEMAND:
                     demandsCounter++;
                     
-                    if (msg[0] >= goCounters[&status.MPI_SOURCE]){
+                    if (msg[0] >= goCounters[status.MPI_SOURCE])
+                    {
                         wineDemands[status.MPI_SOURCE] = msg[1];
                     }
 
@@ -228,6 +236,8 @@ int main(int argc, char** argv){
                         //TODO: send winemakers' offers list
                         MPI_Send(msg, 2, MPI_INT, status.MPI_SOURCE, TAG_BATON, MPI_COMM_WORLD);
                     }
+
+                    freeStudents[status.MPI_SOURCE] = 1;
                     break;
 
                 case TAG_OFFER:
@@ -235,7 +245,7 @@ int main(int argc, char** argv){
                     offersCounter++;
                     if (amILider)
                     {
-                        liderSection(offersCounter, demandsCounter, freeStudents);
+                        liderSection(offersCounter, demandsCounter, freeStudents, offers, winemakersClocks, mpi_lider_msg);
                     }
                     break; 
 
@@ -244,19 +254,19 @@ int main(int argc, char** argv){
                     break;
                 
                 case TAG_HOMEBASE:
-                    int student = status.MPI_source;
+                    int student = status.MPI_SOURCE;
                     goCounters[student]++;
 
-                    int wineTaken = min(wineDemands[student], wineOffers[winemaker]);
-                    wineOffers[msg[1]] -= wineTaken; 
+                    int wineTaken = std::min(wineDemands[student], offers[msg[1]]);
+                    offers[msg[1]] -= wineTaken; 
                     wineDemands[student] -= wineTaken;
 
-                    if (wineOffers[msg[1]] == 0)
+                    if (offers[msg[1]] == 0)
                         offersCounter--;
                     if (wineDemands[student] == 0)
                         demandsCounter--;
                     
-                    freeStudents[i] = 1;
+                    freeStudents[student] = 1;
                     break;
             }
         }
