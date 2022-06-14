@@ -39,7 +39,7 @@ void sendToStudents(int* msg, int tag)
 
 void sendBatonMessage(MPI_Datatype mpi_lider_msg, int newLider)
 {
-    msg_s msg_long;
+    /*msg_s msg_long;
     std::copy(wineDemands, wineDemands + STUDENTS, msg_long.wineDemands);
     std::copy(goCounters, goCounters + STUDENTS , msg_long.goCounters);
     std::copy(offers, offers + WINEMAKERS, msg_long.wineOffers);
@@ -47,9 +47,11 @@ void sendBatonMessage(MPI_Datatype mpi_lider_msg, int newLider)
     std::copy(freeStudents, freeStudents + STUDENTS, msg_long.freeStudents);
 
     amILider = false;
-    debug("New lider: %d", newLider+OFFSET);
+    
 
-    MPI_Send(&msg_long, 2, mpi_lider_msg, newLider + OFFSET, TAG_BATON, MPI_COMM_WORLD);
+    MPI_Send(&msg_long, 2, mpi_lider_msg, newLider + OFFSET, TAG_BATON, MPI_COMM_WORLD);*/
+    
+    debug("New lider: %d", newLider+OFFSET);
 }
 
 
@@ -106,7 +108,7 @@ void goForIt(int winemaker)
         determineDemand();
         //TODO: śpij
     }*/
-    debug("Poszedlem");
+    debug("Poszedlem do %d", winemaker);
 }
 
 void liderSection(int offersCounter, int demandsCounter, bool* freeStudents, int* wineOffers, int* winemakersClocks, MPI_Datatype mpi_lider_msg)
@@ -191,6 +193,7 @@ void liderSection(int offersCounter, int demandsCounter, bool* freeStudents, int
 	    {
 		int msg[2];
 		msg[1] = *winemaker;
+		debug("Wysylam do %d o winie u %d", *student + OFFSET, *winemaker);
 	    	MPI_Send(msg, 2, MPI_INT, *student + OFFSET, TAG_GO, MPI_COMM_WORLD);
 	    }
 	    
@@ -199,6 +202,9 @@ void liderSection(int offersCounter, int demandsCounter, bool* freeStudents, int
 
             studentsQ.pop_front();
             winemakersQ.pop_front();
+            
+            student = studentsQ.begin();
+            winemaker = winemakersQ.begin();
         }
 
         //przekaż pałeczkę następnemu studentowi w kolejce, jeżeli go nie ma, pierwszemu wolnemu
