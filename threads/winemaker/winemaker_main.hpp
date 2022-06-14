@@ -6,9 +6,8 @@
 #include <stdlib.h>
 #include <algorithm>
 
-//TODO: wczytywać jako parametr
 #define MAX_WINE_WINEMAKER 10
-#define SAFE_PLACES 2
+#define SAFE_PLACES 1 
 
 #define TAG_SAFE_PLACE_DEMAND 3 //I need safe place
 
@@ -22,6 +21,6 @@ extern int acksLeft; // how many acks needed to enter critical section
 int winemakerMain();
 void produceWine();
 void meetStudent(int studentRank, int wineToGive);
-void askForSafePlace();
+bool askForSafePlace();
 
 

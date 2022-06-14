@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     //int my_rank;
     //MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
  
-    debug("Pomyslnie stworzono proces: %d", rank);
+   // debug("Pomyslnie stworzono proces: %d", rank);
     
     if (rank < WINEMAKERS)
     {
