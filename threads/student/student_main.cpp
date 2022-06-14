@@ -39,7 +39,7 @@ void sendToStudents(int* msg, int tag)
 
 void sendBatonMessage(MPI_Datatype mpi_lider_msg, int newLider)
 {
-    /*msg_s msg_long;
+    msg_s msg_long;
     std::copy(wineDemands, wineDemands + STUDENTS, msg_long.wineDemands);
     std::copy(goCounters, goCounters + STUDENTS , msg_long.goCounters);
     std::copy(offers, offers + WINEMAKERS, msg_long.wineOffers);
@@ -48,8 +48,7 @@ void sendBatonMessage(MPI_Datatype mpi_lider_msg, int newLider)
 
     amILider = false;
     
-
-    MPI_Send(&msg_long, 2, mpi_lider_msg, newLider + OFFSET, TAG_BATON, MPI_COMM_WORLD);*/
+    MPI_Send(&msg_long, 1, mpi_lider_msg, newLider + OFFSET, TAG_BATON, MPI_COMM_WORLD);
     
     debug("New lider: %d", newLider+OFFSET);
 }
