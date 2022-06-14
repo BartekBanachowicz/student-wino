@@ -303,7 +303,7 @@ int studentMain()
 
             for (int i=1; i<WINEMAKERS; i++)
             {
-                if (msg_long.winemakersClocks[i] > winemakersClocks[i])
+                if (msg_long.winemakersClocks[i] >= winemakersClocks[i])
                 {
                     offers[i] = msg_long.wineOffers[i];
                     winemakersClocks[i] = msg_long.winemakersClocks[i];
