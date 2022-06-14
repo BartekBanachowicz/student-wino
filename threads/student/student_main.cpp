@@ -303,7 +303,7 @@ int studentMain()
 		//	printTab(winemakersClocks, WINEMAKERS, "    wC");
 		//	printTab(offers, WINEMAKERS, "    wineO");
 
-            for (int i=1; i<WINEMAKERS; i++)
+            for (int i=0; i<WINEMAKERS; i++)
             {
                 if (msg_long.winemakersClocks[i] >= winemakersClocks[i])
                 {
@@ -320,7 +320,7 @@ int studentMain()
         }
         else
         {
-            MPI_Recv(msg, 3, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+            MPI_Recv(msg, 2, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             
             switch(status.MPI_TAG)
             {
@@ -353,8 +353,8 @@ int studentMain()
                     break; 
 
                 case TAG_GO: //od lidera że mam pójść 
-                    debug("Wiadomość - zielone swiatło od %d", status.MPI_SOURCE);
-                    goForIt(msg[2]);
+                    debug("Wiadomość - zielone swiatło od %d, aby pojsc do %d", status.MPI_SOURCE, msg[1]);
+                    goForIt(msg[1]);
                     break;
                 
                 case TAG_HOMEBASE:
@@ -362,17 +362,17 @@ int studentMain()
                     int student = status.MPI_SOURCE;
 
                     
-					correctWine(student, msg[2]);
-					int wineTaken = std::min(wineDemands[student], offers[msg[2]]);
-                    offers[msg[2]] -= wineTaken; 
+					correctWine(student, msg[1]);
+					int wineTaken = std::min(wineDemands[student], offers[msg[1]]);
+                    offers[msg[1]] -= wineTaken; 
                     wineDemands[student] -= wineTaken;
 
-                    if (offers[msg[2]] > 0)
+                    if (offers[msg[1]] > 0)
                         offersCounter++;
                     if (wineDemands[student] > 1)
                         demandsCounter++;
                     
-                    freeStudents[student] = 2;
+                    freeStudents[student] = 1;
                     break;
             }
         }
