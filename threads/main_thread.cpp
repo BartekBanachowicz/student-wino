@@ -35,11 +35,11 @@ void check_thread_support(int provided)
 void inicjuj(int argc, char **argv)
 {
     // int provided;
-    // MPI_Init(&argc, &argv); 
+    MPI_Init(&argc, &argv); 
     // MPI_Init_thread(argc, argv,MPI_THREAD_MULTIPLE, &provided);
     // check_thread_support(provided);
 
-    std::cout<<"Tutaj"<<std::endl;
+    //std::cout<<"Tutaj"<<std::endl;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     //log("jestem");
 }
@@ -69,14 +69,23 @@ void finalizuj()
 int main(int argc, char* argv[])
 {
     // Initilialise MPI and check its completion
-    MPI_Init(&argc, &argv);
+    // MPI_Init(&argc, &argv);
+    inicjuj(argc, argv);
  
     // Get my rank
-    int my_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    //int my_rank;
+    //MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
  
-    printf("Process %d has initialised its MPI environment.\n", my_rank);
- 
+    debug("Pomyslnie stworzono proces: %d", rank);
+    
+    if (rank < WINEMAKERS)
+    {
+        winemakerMain();
+        
+    } else
+    {
+    	studentMain();
+    }
     // Tell MPI to shut down.
     MPI_Finalize();
  

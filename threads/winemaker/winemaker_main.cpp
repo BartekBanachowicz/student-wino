@@ -66,8 +66,9 @@ void askForSafePlace(){
 int winemakerMain()
 {
    	//log("Winiarz");
-
-	produceWine();
+    debug("Dzien dobry, jestem winiarzem");
+    produceWine();
+    debug("Wyprodukowalem %d wina", wineAmount);
 	
     //wait for messages
     MPI_Status status;
@@ -78,6 +79,7 @@ int winemakerMain()
 
 	while (1){
 		MPI_Recv(msg, 2, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		debug("Dostalem wiadomosc");
 		//log("Mam wiadomość");
 
 		oldClock = lClock;

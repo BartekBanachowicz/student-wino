@@ -7,7 +7,7 @@
 
 #define STUDENTS 3
 #define OFFSET WINEMAKERS
-#define WINEMAKERS 5
+#define WINEMAKERS 2
 
 #define TAG_OFFER 1 //I have wine
 #define TAG_MEETING 2 //Student wants my wine!
@@ -22,15 +22,15 @@ extern int lClock; //lamport clock
 
 //in msg first value is lamport clock, next is message
 //void log(std::string msg){
-//    std::cout<<"[LOG] "<<rank<<" "<<lClock<<" "<<msg<<std::endl;
+  // std::cout<<"[LOG] "<<rank<<" "<<lClock<<" "<<msg<<std::endl;
 //}
 
 //
-//#ifdef DE
-//#define debug(FORMAT,...) printf("%c[%d;%dm [%d %d]: " FORMAT "%c[%d;%dm\n",  27, (1+(rank/7))%2, 31+(6+rank)%7, rank, lClock, ##__VA_ARGS__, 27,0,37);
-//#else
-//#define debug(...) ;
-//#endif
+#ifdef DE
+#define debug(FORMAT,...) printf("%c[%d;%dm [%d %d]: " FORMAT "%c[%d;%dm\n",  27, (1+(rank/7))%2, 31+(6+rank)%7, rank, lClock, ##__VA_ARGS__, 27,0,37);
+#else
+#define debug(...) ;
+#endif
 //
 //#define P_WHITE printf("%c[%d;%dm",27,1,37);
 //#define P_BLACK printf("%c[%d;%dm",27,1,30);
