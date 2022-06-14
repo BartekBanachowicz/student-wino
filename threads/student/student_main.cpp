@@ -47,6 +47,7 @@ void sendBatonMessage(MPI_Datatype mpi_lider_msg, int newLider)
     std::copy(freeStudents, freeStudents + STUDENTS, msg_long.freeStudents);
 
     amILider = false;
+    debug("New lider: %d", newLider+OFFSET);
 
     MPI_Send(&msg_long, 2, mpi_lider_msg, newLider + OFFSET, TAG_BATON, MPI_COMM_WORLD);
 }
@@ -84,7 +85,7 @@ void freeTables()
 
 void goForIt(int winemaker)
 {
-    int msg[2];
+    /*int msg[2];
     MPI_Status status;
 
     MPI_Recv(msg, 2, MPI_INT, winemaker, TAG_FREE, MPI_COMM_WORLD, &status);
@@ -104,7 +105,8 @@ void goForIt(int winemaker)
         sleep(rand() % MAX_SLEEP);
         determineDemand();
         //TODO: śpij
-    }
+    }*/
+    debug("Poszedlem");
 }
 
 void liderSection(int offersCounter, int demandsCounter, bool* freeStudents, int* wineOffers, int* winemakersClocks, MPI_Datatype mpi_lider_msg)
@@ -166,10 +168,10 @@ void liderSection(int offersCounter, int demandsCounter, bool* freeStudents, int
         for ( auto i : winemakersQ ) std::cout << i << std::endl;
         
         // w sumie można by nawet ich ładniej dopasować
-        int myWinemaker = winemakersQ.front();
-        winemakersQ.pop_front();
+        int myWinemaker;
+        // winemakersQ.pop_front();
 
-        std::cout<<"my_winemaker"<<myWinemaker<<std::endl;
+        // std::cout<<"my_winemaker"<<myWinemaker<<std::endl;
 
         //wyślij studentom wiadomości do których winiarzy mają iść
         auto student = studentsQ.begin();
@@ -179,9 +181,20 @@ void liderSection(int offersCounter, int demandsCounter, bool* freeStudents, int
         {
             int msg[2];
             msg[1] = *winemaker;
-            std::cout<<"winemaker"<<msg[1];
-
-            MPI_Send(msg, 2, MPI_INT, *student + OFFSET, TAG_GO, MPI_COMM_WORLD);
+            //std::cout<<"winemaker"<<msg[1];
+	    
+	    if(*student + OFFSET == rank)
+	    {
+		myWinemaker = *winemaker;
+	    }
+	    else
+	    {
+		int msg[2];
+		msg[1] = *winemaker;
+	    	MPI_Send(msg, 2, MPI_INT, *student + OFFSET, TAG_GO, MPI_COMM_WORLD);
+	    }
+	    
+            
             freeStudents[*student] = 0;
 
             studentsQ.pop_front();
