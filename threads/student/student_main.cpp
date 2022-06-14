@@ -37,6 +37,20 @@ void sendToStudents(int* msg, int tag)
     }
 }
 
+void sendBatonMessage(MPI_Datatype mpi_lider_msg, int newLider)
+{
+    msg_s msg_long;
+    std::copy(wineDemands, wineDemands + STUDENTS, msg_long.wineDemands);
+    std::copy(goCounters, goCounters + STUDENTS , msg_long.goCounters);
+    std::copy(offers, offers + WINEMAKERS, msg_long.wineOffers);
+    std::copy(winemakersClocks, winemakersClocks + WINEMAKERS, msg_long.winemakersClocks);
+    std::copy(freeStudents, freeStudents + STUDENTS, msg_long.freeStudents);
+
+    amILider = false;
+
+    MPI_Send(&msg_long, 2, mpi_lider_msg, newLider + OFFSET, TAG_BATON, MPI_COMM_WORLD);
+}
+
 
 void determineDemand()
 {
@@ -154,17 +168,7 @@ void liderSection(int offersCounter, int demandsCounter, bool* freeStudents, int
             newLider =  studentsQ.front();
         }
 
-
-        msg_s msg_long;
-        std::copy(wineDemands, wineDemands + STUDENTS, msg_long.wineDemands);
-        std::copy(goCounters, goCounters + STUDENTS , msg_long.goCounters);
-        std::copy(wineOffers, wineOffers + WINEMAKERS, msg_long.wineOffers);
-        std::copy(winemakersClocks, winemakersClocks + WINEMAKERS, msg_long.winemakersClocks);
-        std::copy(freeStudents, freeStudents + STUDENTS, msg_long.freeStudents);
-
-        MPI_Send(&msg_long, 2, mpi_lider_msg, newLider + OFFSET, TAG_GO, MPI_COMM_WORLD);
-
-        amILider = false;
+        sendBatonMessage(mpi_lider_msg, newLider);
         goForIt(myWinemaker);
     }
 }
@@ -184,7 +188,6 @@ int studentMain()
     int demandsCounter = 0;
     
 	determineDemand();
-    // TODO: ma czekać na żądania od wszystkich
 	allocTables(sizeof(msg));
 
 	while (1)
@@ -237,8 +240,7 @@ int studentMain()
 
                     if (amILider && wineDemand == 0)
                     {
-                        //TODO: send winemakers' offers list
-                        MPI_Send(msg, 2, MPI_INT, status.MPI_SOURCE, TAG_BATON, MPI_COMM_WORLD);
+                        sendBatonMessage(mpi_lider_msg, status.MPI_SOURCE);
                     }
 
                     freeStudents[status.MPI_SOURCE] = 1;

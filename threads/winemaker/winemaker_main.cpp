@@ -53,9 +53,11 @@ void askForSafePlace(){
 
 	int msg[2] = {++lClock, wineAmount};
 	
-	for (int i = 0; i < WINEMAKERS; i++){
-		if (i != rank){
-			//TODO: niektórzy nam nie odpowiedzą, więc po co wysyłać
+	for (int i = 0; i < WINEMAKERS; i++)
+	{
+		if (i != rank)
+		{
+			//WARNING: zwiększa koszt komunikacyjny - możliwa optymalizacja (niektórzy i tak nam nie odpiszą)
         	MPI_Send(msg, 2, MPI_INT, i, TAG_SAFE_PLACE_DEMAND, MPI_COMM_WORLD);
 		}
     }
