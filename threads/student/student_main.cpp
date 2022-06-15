@@ -145,7 +145,6 @@ void liderSection(int* offersCounter, int* demandsCounter, bool* freeStudents, i
         //Sortujemy wolnych studentów insertion sortem na podstawie goCounters i wineDemands
         std::list<int> studentsQ;
         int newLider = -1;
-        
 		for (int i=0; i<STUDENTS; i++)
         {
             if (freeStudents[i] == 1)
@@ -153,8 +152,13 @@ void liderSection(int* offersCounter, int* demandsCounter, bool* freeStudents, i
                 auto pos = studentsQ.begin();
                 if (studentsQ.size() > 0)
                 {
-		        	while (goCounters[*pos] < goCounters[i]) pos++;
-		        	while (goCounters[*pos] == goCounters[i] && wineDemands[*pos] < wineDemands[i]) pos++; //QUESTION: rosnąco czy malejąco?
+		        	while (goCounters[*pos] < goCounters[i] && pos != studentsQ.end()){
+							 pos++;
+						}
+		        	while (goCounters[*pos] == goCounters[i] && wineDemands[*pos] < wineDemands[i] && pos != studentsQ.end())
+					{	
+					 	pos++; //QUESTION: rosnąco czy malejąco?
+					}
 				}
                 studentsQ.insert(pos, i);
             }
@@ -247,7 +251,6 @@ int studentMain()
     MPI_Status status;
     int msg [2];
     msg_s msg_long; 
-	int oldClock;
     int offersCounter = 0;
     int demandsCounter = 0;
     
@@ -286,22 +289,16 @@ int studentMain()
                 {
                     wineDemands[i] = msg_long.wineDemands[i];
                     goCounters[i] = msg_long.goCounters[i];
-						
-					if ((msg_long.freeStudents[i] == 0) && (freeStudents[i] == 1))
-               		{
-						demandsCounter--;
-						offersCounter--;
-					}
 					freeStudents[i] = msg_long.freeStudents[i];
 				 }
             }
-		//	printTab(wineDemands, STUDENTS, "wd po aktualizacji");
+			printTab(wineDemands, STUDENTS, "demands");
 		//	printTab(goCounters, STUDENTS, "gc po akt");
 
 		//	printTab(msg_long.winemakersClocks, WINEMAKERS, "msg.winemakersClocks");
 		//	printTab(msg_long.wineOffers, WINEMAKERS, "msg.wineOffers");
 		//	printTab(winemakersClocks, WINEMAKERS, "    wC");
-		//	printTab(offers, WINEMAKERS, "    wineO");
+		//printTab(offers, WINEMAKERS, "offers");
 
             for (int i=0; i<WINEMAKERS; i++)
             {
@@ -312,8 +309,20 @@ int studentMain()
                 }
             }
 
-		//	printTab(offers, WINEMAKERS, "wo po aktualizacji");
+			printTab(offers, WINEMAKERS, "offers");
 		//	printTab(winemakersClocks, WINEMAKERS, "wc po akt");
+			offersCounter = 0;
+			for (int i=0; i<WINEMAKERS; i++)
+			{
+				if(offers[i]>0) offersCounter++;
+			}			
+		
+			demandsCounter = 0;
+			for (int i=0; i<STUDENTS; i++)
+			{
+				if(wineDemands[i]>0 && freeStudents[i]) demandsCounter++;
+			}			
+
 
             liderSection(&offersCounter, &demandsCounter, freeStudents, offers, winemakersClocks, mpi_lider_msg);
             
@@ -362,10 +371,7 @@ int studentMain()
                     int student = status.MPI_SOURCE;
 
                     
-					correctWine(student, msg[1]);
-					int wineTaken = std::min(wineDemands[student], offers[msg[1]]);
-                    offers[msg[1]] -= wineTaken; 
-                    wineDemands[student] -= wineTaken;
+					correctWine(student-OFFSET, msg[1]);
 
                     if (offers[msg[1]] > 0)
                         offersCounter++;

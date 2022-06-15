@@ -13,7 +13,7 @@ void produceWine(){
     debug("Wyprodukowałem %d wina", wineAmount);
     
     int msg [2] = {++lClock, wineAmount};
-    for (int currRank = WINEMAKERS ; currRank < WINEMAKERS + STUDENTS; currRank++){
+    for (int currRank = OFFSET ; currRank < OFFSET + STUDENTS; currRank++){
         MPI_Send( msg, 2, MPI_INT, currRank, TAG_OFFER, MPI_COMM_WORLD);
     }
 }
@@ -54,7 +54,7 @@ bool askForSafePlace(){
 	demand = true;
 	
 	acksLeft = std::max(WINEMAKERS - 1 - (SAFE_PLACES - safePlaces), 0); //excluding me and winemakers before me
-	debug("będę potrzebował %d acków", acksLeft);
+	debug("będę potrzebował %d acków, safePlaces: %d", acksLeft, safePlaces);
 	
 
 	int msg[2] = {++lClock, wineAmount};
@@ -117,34 +117,39 @@ int winemakerMain()
 			break;
 			
 			case TAG_SAFE_PLACE_DEMAND:
-			
+				debug("będzie jakieś żądanie ack");
 				MPI_Recv(msg, 2, MPI_INT, MPI_ANY_SOURCE, TAG_SAFE_PLACE_DEMAND, MPI_COMM_WORLD, &status);
 				oldClock = lClock;
 				lClock = std::max(msg[0], lClock) + 1;
 				// I don't want to enter or I have lower priority – aggree
-				if (!demand || 
-					msg[0] < oldClock || 
-					((msg[0] == oldClock) && msg[1] > wineAmount) || 
-					((msg[0] == oldClock) && (msg[1] == wineAmount) && status.MPI_SOURCE > rank)){ 
-					debug("Wiadomość – ktoś chce miejsce – Zgadzam się; safeplaces: %d", safePlaces-1);
-					msg[0] = ++lClock;
-					msg[1] = 89; 
-					MPI_Send(msg, 2, MPI_INT, status.MPI_SOURCE, TAG_ACK, MPI_COMM_WORLD);
+				//if (msg[0] <= oldClock)
+				//{
+					if (!demand || 
+						msg[0] < oldClock || 
+						((msg[0] == oldClock) && msg[1] > wineAmount) || 
+						((msg[0] == oldClock) && (msg[1] == wineAmount) && status.MPI_SOURCE > rank)){ 
+						debug("Wiadomość – ktoś chce miejsce – Zgadzam się; safeplaces: %d", safePlaces-1);
+						msg[0] = ++lClock;
+						msg[1] = 89; 
+						MPI_Send(msg, 2, MPI_INT, status.MPI_SOURCE, TAG_ACK, MPI_COMM_WORLD);
 					
-					safePlaces--;
-				}
-				else{
-					debug("Wiadomość – ktoś chce miejsce, ale mu nie dam");
-					// don't agree
-					wmakersAfterMe++;	
-				}
+						safePlaces--;
+					}
+					else{
+						debug("Wiadomość – ktoś chce miejsce, ale mu nie dam");
+						// don't agree
+						wmakersAfterMe++;
+					}	
+				//}
+				//else	
+				//	debug("Przeterminowane żądanie ack");
 				break;
 			
 			case TAG_FREE:
 				MPI_Recv(msg, 2, MPI_INT, MPI_ANY_SOURCE, TAG_FREE, MPI_COMM_WORLD, &status);
 				oldClock = lClock;
 				lClock = std::max(msg[0], lClock) + 1;
-				debug("Wiadomość – ktoś zwolnił miejsce; safeplaces: %d", safePlaces+1);
+				debug("Wiadomość – ktoś zwolnił miejsce; safeplaces: %d %d", safePlaces+1, acksLeft);
 				safePlaces++;
 				if (demand && acksLeft == 0 && safePlaces > 0){
 					meetStudent(studentToMeet, wineToGive, &activeMeeting);
