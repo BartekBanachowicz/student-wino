@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <vector>
 
 #define MAX_WINE_WINEMAKER 10
 #define SAFE_PLACES 1 

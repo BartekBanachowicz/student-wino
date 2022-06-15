@@ -117,12 +117,10 @@ void goForIt(int winemaker)
     msg[0] = ++lClock;
     msg[1] = winemaker;
 
-    //WARNING: tu można wysłać też ofertę i żądanie, żeby zaktualizować
     sendToStudents(msg, TAG_HOMEBASE);
 
     if (wineDemand == 0){
 
-        //TODO: jak jestem liderem to wątek śpi
 		debug("śpię");
         sleep(rand() % MAX_SLEEP);
         determineDemand();
@@ -180,8 +178,8 @@ void liderSection(int* offersCounter, int* demandsCounter, bool* freeStudents, i
                 auto pos = winemakersQ.begin();
                 if(winemakersQ.size() > 0)
                 {
-		        	while(winemakersClocks[*pos] < winemakersClocks[i]) pos++;
-		    	    while(winemakersClocks[*pos] == winemakersClocks[i] && wineOffers[*pos] > wineOffers[i]) pos++;
+		        	while(winemakersClocks[*pos] < winemakersClocks[i] && pos != winemakersQ.end()) pos++;
+		    	    while(winemakersClocks[*pos] == winemakersClocks[i] && wineOffers[*pos] > wineOffers[i] && pos != winemakersQ.end()) pos++;
 				}
                 winemakersQ.insert(pos, i);
             }

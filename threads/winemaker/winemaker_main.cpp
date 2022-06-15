@@ -3,7 +3,7 @@
 int wineAmount, wmakersAfterMe, acksLeft;
 int safePlaces = SAFE_PLACES;
 bool demand = false;
-
+std::vector<int[2]> studentstoServe;
 
 void produceWine(){
     srand(time(NULL) + rank);
@@ -91,7 +91,7 @@ int winemakerMain()
     	//wait for messages
     	
     	MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-
+		debug("Mam wiadomość %d", status.MPI_SOURCE);
 		
 	
 		switch(status.MPI_TAG){
