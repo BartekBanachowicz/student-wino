@@ -13,4 +13,4 @@ clean:
 	rm main a.out
 
 run: main
-	mpirun --oversubscribe -np 5 ./main
+	mpirun --oversubscribe -np 5 -mca orte_base_help_aggregate 0 ./main

@@ -19,15 +19,17 @@ void produceWine(){
 }
 
 void meetStudent(int studentRank, int wineToGive, bool *activeMeeting){
-	debug("Oddaję %d wina", wineToGive);
+	debug("Oddaję %d wina. SafePlaces %d", wineToGive, safePlaces-wmakersAfterMe);
 
 	wineAmount -= wineToGive;
 	int msg[2] = {++lClock, wineAmount}; //send how much wine left
 
 	MPI_Send(msg, 2, MPI_INT, studentRank, TAG_FREE, MPI_COMM_WORLD);
 
-	for (int currRank = 0; currRank < WINEMAKERS; currRank++){
-		MPI_Send(msg, 2, MPI_INT, currRank, TAG_FREE, MPI_COMM_WORLD);
+	for (int currRank = 0; currRank < WINEMAKERS; currRank++)
+	{
+		if (currRank != rank)
+			MPI_Send(msg, 2, MPI_INT, currRank, TAG_FREE, MPI_COMM_WORLD);
 	}	
 	demand = false;
 
@@ -54,8 +56,6 @@ bool askForSafePlace(){
 	acksLeft = std::max(WINEMAKERS - 1 - (SAFE_PLACES - safePlaces), 0); //excluding me and winemakers before me
 	debug("będę potrzebował %d acków", acksLeft);
 	
-	if (acksLeft == 0)
-		return 1;
 
 	int msg[2] = {++lClock, wineAmount};
 	
@@ -67,7 +67,10 @@ bool askForSafePlace(){
         	MPI_Send(msg, 2, MPI_INT, i, TAG_SAFE_PLACE_DEMAND, MPI_COMM_WORLD);
 		}
     }
-	return 0;
+	if (acksLeft == 0)
+		return 1;
+	else 
+		return 0;
 }
 
 int winemakerMain()

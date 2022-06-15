@@ -161,9 +161,9 @@ void liderSection(int* offersCounter, int* demandsCounter, bool* freeStudents, i
 			else if (newLider == -1) newLider = i;
         }
         
-        //std::cout<<"Studenci: ";
-        //for ( auto i : studentsQ ) std::cout << i+OFFSET << ", ";
-        //std::cout<<std::endl;
+        std::cout<<"Studenci: ";
+        for ( auto i : studentsQ ) std::cout << i+OFFSET << ", ";
+        std::cout<<std::endl;
         
 
         //dopisz ofertę do kolejki winiarzy (wg. czasu, później oferty, później rangi)
@@ -183,9 +183,9 @@ void liderSection(int* offersCounter, int* demandsCounter, bool* freeStudents, i
             }
         }
         
-		//std::cout<<"Winiarze: ";
-        //for ( auto i : winemakersQ ) std::cout << i <<", ";
-		//std::cout<< std::endl;
+		std::cout<<"Winiarze: ";
+        for ( auto i : winemakersQ ) std::cout << i <<", ";
+		std::cout<< std::endl;
         
         // w sumie można by nawet ich ładniej dopasować
         int myWinemaker = -1;
