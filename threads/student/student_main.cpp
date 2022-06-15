@@ -41,7 +41,6 @@ MPI_Datatype create_MPI_struct()
 
 void sendToStudents(int* msg, int tag)
 {
-	//log("Wysyłam wiadomość");
     for (int r = OFFSET ; r < OFFSET + STUDENTS; r++){
         MPI_Send(msg, 2, MPI_INT, r, tag, MPI_COMM_WORLD);
     }
@@ -67,7 +66,6 @@ int correctWine(int student, int winemaker)
 	int wineTaken = std::min(wineDemands[student], offers[winemaker]);
     offers[winemaker] -= wineTaken; 
     wineDemands[student] -= wineTaken;
-	debug("Transakcja na %d wina. Studentowi %d zostało %d, a winiarzowi %d - %d", wineTaken, student + OFFSET, wineDemands[student], winemaker, offers[winemaker]);
 	return wineTaken;
 }
 
@@ -75,10 +73,9 @@ void determineDemand()
 {
     srand(time(NULL) + rank);
     wineDemand = rand() % MAX_WINE_STUDENT +1;
+	debug("Chcę wypić %d wina", wineDemand);	
 
     //send message to students
-    ////log("Żądam " + std::to_string(wineDemand) + " wina");
-    
     int msg [2] = {lClock, wineDemand};
 	sendToStudents(msg, TAG_WINE_DEMAND);
 }
@@ -109,7 +106,6 @@ void goForIt(int winemaker)
 
 	//czeka na wiadomość od winiarza
     MPI_Recv(msg, 2, MPI_INT, winemaker, TAG_FREE, MPI_COMM_WORLD, &status);
-    debug("Winiarz mnie przyjął");
 	offers[winemaker] = msg[1];
 
     wineDemand -= std::min(offers[winemaker], wineDemand);
@@ -129,15 +125,22 @@ void goForIt(int winemaker)
 
 void liderSection(int* offersCounter, int* demandsCounter, bool* freeStudents, int* wineOffers, int* winemakersClocks, MPI_Datatype mpi_lider_msg)
 {
-    debug("Jestem w sekcji dla lidera i mam %d studentów i %d winiarzy", *demandsCounter, *offersCounter);
+    debug("Jestem w sekcji dla lidera");
 	
-   // for(int i = 0; i<STUDENTS; i++)
-   // {
-    //	std::cout<<freeStudents[i]<<" ";
-   // }
-    
-   // std::cout<<std::endl;
- 
+	*demandsCounter = 0;
+    for(int i = 0; i<STUDENTS; i++)
+    {
+		freeStudents[i] = 1;
+		if(wineDemands[i] > 0) (*demandsCounter)++;
+    }
+
+	
+	*offersCounter = 0;
+	for (int i=0; i<WINEMAKERS; i++)
+	{
+		if(offers[i]>0) (*offersCounter)++;
+    }
+	
     if (*offersCounter > 0 && *demandsCounter > 0)
     {
         //Sortujemy wolnych studentów insertion sortem na podstawie goCounters i wineDemands
@@ -163,10 +166,6 @@ void liderSection(int* offersCounter, int* demandsCounter, bool* freeStudents, i
 			else if (newLider == -1) newLider = i;
         }
         
-        std::cout<<"Studenci: ";
-        for ( auto i : studentsQ ) std::cout << i+OFFSET << ", ";
-        std::cout<<std::endl;
-        
 
         //dopisz ofertę do kolejki winiarzy (wg. czasu, później oferty, później rangi)
         std::list<int> winemakersQ;
@@ -184,10 +183,6 @@ void liderSection(int* offersCounter, int* demandsCounter, bool* freeStudents, i
                 winemakersQ.insert(pos, i);
             }
         }
-        
-		std::cout<<"Winiarze: ";
-        for ( auto i : winemakersQ ) std::cout << i <<", ";
-		std::cout<< std::endl;
         
         // w sumie można by nawet ich ładniej dopasować
         int myWinemaker = -1;
@@ -210,7 +205,6 @@ void liderSection(int* offersCounter, int* demandsCounter, bool* freeStudents, i
 		    else
 		    {
 				msg[1] = *winemaker;
-				debug("Wysylam studenta %d do winiarza %d", *student + OFFSET, *winemaker);
 	    		MPI_Send(msg, 2, MPI_INT, *student + OFFSET, TAG_GO, MPI_COMM_WORLD);
 			}
 			msg[0] = *student + OFFSET;
@@ -237,7 +231,6 @@ void liderSection(int* offersCounter, int* demandsCounter, bool* freeStudents, i
 		if (newLider != -1) sendBatonMessage(mpi_lider_msg, newLider + OFFSET); //jakiś student nie idzie po wino
         if (myWinemaker != -1) goForIt(myWinemaker);
     }
-	debug("Zostało %d niezaspokojonych studentów i %d winiarzy", *demandsCounter, *offersCounter);	
 }
 
 int studentMain()
@@ -253,7 +246,6 @@ int studentMain()
     int demandsCounter = 0;
     
     determineDemand();
-    debug("Wypilbym %d wina", wineDemand);
 	allocTables(sizeof(msg));
 
     if(rank == OFFSET)
@@ -272,14 +264,6 @@ int studentMain()
             MPI_Recv(&msg_long, 1, mpi_lider_msg, MPI_ANY_SOURCE, TAG_BATON, MPI_COMM_WORLD, &status);
             amILider = true;
 
-		//	printTab(msg_long.goCounters, STUDENTS, "msg.goCounters");
-		//	printTab(msg_long.wineDemands, STUDENTS, "msg.wineDemands");
-		//	printTab(goCounters, STUDENTS, "    goCounters");
-		//	printTab(wineDemands, STUDENTS, "    wineDemands");
-
-		//	for (int i=0; i< STUDENTS;i++) std::cout<<msg_long.freeStudents[i]<<", ";
-		//	std::cout<<std::endl;
-			
             //zaktualizuj żądania studentów i winiarzy – WYGLĄDA OK
             for (int i=0; i<STUDENTS; i++)
             {
@@ -290,13 +274,6 @@ int studentMain()
 					freeStudents[i] = msg_long.freeStudents[i];
 				 }
             }
-			printTab(wineDemands, STUDENTS, "demands");
-		//	printTab(goCounters, STUDENTS, "gc po akt");
-
-		//	printTab(msg_long.winemakersClocks, WINEMAKERS, "msg.winemakersClocks");
-		//	printTab(msg_long.wineOffers, WINEMAKERS, "msg.wineOffers");
-		//	printTab(winemakersClocks, WINEMAKERS, "    wC");
-		//printTab(offers, WINEMAKERS, "offers");
 
             for (int i=0; i<WINEMAKERS; i++)
             {
@@ -307,8 +284,7 @@ int studentMain()
                 }
             }
 
-			printTab(offers, WINEMAKERS, "offers");
-		//	printTab(winemakersClocks, WINEMAKERS, "wc po akt");
+			
 			offersCounter = 0;
 			for (int i=0; i<WINEMAKERS; i++)
 			{
@@ -338,6 +314,8 @@ int studentMain()
                     if (msg[0] >= goCounters[status.MPI_SOURCE-OFFSET])
                     {
                         wineDemands[status.MPI_SOURCE-OFFSET] = msg[1];
+						goCounters[status.MPI_SOURCE-OFFSET] = msg[0];
+                    	freeStudents[status.MPI_SOURCE-OFFSET] = 1;
                     }
 
                     if (amILider && demandsCounter == 1)
@@ -345,7 +323,6 @@ int studentMain()
                         sendBatonMessage(mpi_lider_msg, status.MPI_SOURCE);
                     }
 
-                    freeStudents[status.MPI_SOURCE-OFFSET] = 1;
                     break;
 
                 case TAG_OFFER:
@@ -360,23 +337,26 @@ int studentMain()
                     break; 
 
                 case TAG_GO: //od lidera że mam pójść 
-                    debug("Wiadomość - zielone swiatło od %d, aby pojsc do %d", status.MPI_SOURCE, msg[1]);
+                    debug("Wiadomość - zielone swiatło, idę do %d", msg[1]);
                     goForIt(msg[1]);
                     break;
                 
                 case TAG_HOMEBASE:
-                    debug("Wiadomość - student %d pił", status.MPI_SOURCE);
+                    debug("Wiadomość - student %d wrócił", status.MPI_SOURCE);
                     int student = status.MPI_SOURCE;
 
-                    
-					correctWine(student-OFFSET, msg[1]);
-
+                    if (msg[0] > goCounters[student])
+					{
+						correctWine(student-OFFSET, msg[1]);
+						goCounters[student] = msg[0];
+					}
                     if (offers[msg[1]] > 0)
                         offersCounter++;
                     if (wineDemands[student] > 1)
                         demandsCounter++;
                     
                     freeStudents[student] = 1;
+					if(amILider) liderSection(&offersCounter, &demandsCounter, freeStudents, offers, winemakersClocks, mpi_lider_msg);
                     break;
             }
         }
