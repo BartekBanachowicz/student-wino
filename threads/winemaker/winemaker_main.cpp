@@ -3,7 +3,10 @@
 int wineAmount, wmakersAfterMe, acksLeft;
 int safePlaces = SAFE_PLACES;
 bool demand = false;
-std::vector<int[2]> studentstoServe;
+int studentToMeet;
+int wineToGive;
+
+std::queue<std::array<int, 2>> studentsToServe;
 
 void produceWine(){
     srand(time(NULL) + rank);
@@ -16,6 +19,21 @@ void produceWine(){
     for (int currRank = OFFSET ; currRank < OFFSET + STUDENTS; currRank++){
         MPI_Send( msg, 2, MPI_INT, currRank, TAG_OFFER, MPI_COMM_WORLD);
     }
+}
+
+void serveStudent(int* msg, bool* activeMeeting){
+	int oldClock = lClock;
+	lClock = std::max(msg[0], lClock) + 1;
+				
+	*activeMeeting = true;
+	debug("Wiadomość – spotkanie z %d", msg[0]);
+	bool res = askForSafePlace();
+	studentToMeet = msg[0];
+	wineToGive = msg[1];
+	// if I dont need acks (many safe places or nobody will give me)
+	if (res && safePlaces > 0){
+		meetStudent(studentToMeet, wineToGive, activeMeeting);
+	}
 }
 
 void meetStudent(int studentRank, int wineToGive, bool *activeMeeting){
@@ -46,6 +64,12 @@ void meetStudent(int studentRank, int wineToGive, bool *activeMeeting){
 	}
 	
 	*activeMeeting = false;
+	if (studentsToServe.size()>0)
+	{
+		int newStudent[2] = {studentsToServe.front()[0], studentsToServe.front()[1]};
+		studentsToServe.pop();
+		serveStudent(newStudent, activeMeeting);
+	}
 }
 
 bool askForSafePlace(){
@@ -80,10 +104,7 @@ int winemakerMain()
 	
     MPI_Status status;
     int msg [2];
-	int studentToMeet;
-	int wineToGive;
 	int oldClock;
-	bool res;
 	bool activeMeeting = false;
 
 	while (1)
@@ -96,23 +117,19 @@ int winemakerMain()
 	
 		switch(status.MPI_TAG){
 			case TAG_MEETING: // student asks for meeting
+				MPI_Recv(msg, 2, MPI_INT, MPI_ANY_SOURCE, TAG_MEETING, MPI_COMM_WORLD, &status);
 				if(!activeMeeting)
 				{
-					MPI_Recv(msg, 2, MPI_INT, MPI_ANY_SOURCE, TAG_MEETING, MPI_COMM_WORLD, &status);
-					oldClock = lClock;
-					lClock = std::max(msg[0], lClock) + 1;
-					
-					activeMeeting = true;
-		
-					debug("Wiadomość – spotkanie z %d", msg[0]);
-					res = askForSafePlace();
-					studentToMeet = msg[0];
-					wineToGive = msg[1];
-					// if I dont need acks (many safe places or nobody will give me)
-					if (res && safePlaces > 0){
-						meetStudent(studentToMeet, wineToGive, &activeMeeting);
-					}
+					serveStudent(msg, &activeMeeting);
 				}
+				else
+				{
+					//WARNING: czy na pewno kopiuje?	
+					std::array<int, 2> temp;			
+					std::copy(msg, msg+2, std::begin(temp));
+					studentsToServe.push(temp);
+				}
+
 						
 			break;
 			
